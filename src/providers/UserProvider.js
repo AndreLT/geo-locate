@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-import { auth, firestore } from "../lib/firebase";
+import { auth, firestore, analytics } from "../lib/firebase";
 import { createUser } from "../lib/db";
 
 const authContext = createContext();
@@ -48,16 +48,13 @@ function useProvideAuth() {
 
         console.log("Successfully created new user:", userRecord);
         setLoading(false);
-      })
-      .catch((error) => {
-        console.log("Error creating new user:", error);
-        setLoading(false);
       });
   };
 
   const signInWithEmail = (email, password) => {
     setLoading(true);
-    auth.signInWithEmailAndPassword(email, password).then((response) => {
+
+    return auth.signInWithEmailAndPassword(email, password).then((response) => {
       firestore
         .collection("users")
         .doc(response.user.uid)
@@ -69,9 +66,11 @@ function useProvideAuth() {
             email: data.email,
             name: data.name,
           };
-          console.log(signinUser);
+
           localStorage.setItem("geo-locate-user", JSON.stringify(signinUser));
           setUser(signinUser);
+
+          analytics.logEvent("login");
         });
     });
   };

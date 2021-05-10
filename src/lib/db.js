@@ -8,7 +8,7 @@ export const createUser = async (user) => {
     const { email, name } = user;
     try {
       await userRef.set({
-        displayName: name,
+        name: name,
         email,
       });
     } catch (error) {
