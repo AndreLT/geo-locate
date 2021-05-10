@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-import { auth } from "../lib/firebase";
+import { auth, firestore } from "../lib/firebase";
 import { createUser } from "../lib/db";
 
 const authContext = createContext();
@@ -16,12 +16,18 @@ export const useAuth = () => {
 };
 
 function useProvideAuth() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("geo-locate-user")) || null
+  );
   const [loading, setLoading] = useState(true);
-
+  console.log(user);
   const handleUser = async (rawUser) => {
     if (rawUser) {
       console.log(rawUser);
+      setLoading(false);
+    } else {
+      setUser(false);
+      setLoading(false);
     }
   };
 
@@ -34,36 +40,54 @@ function useProvideAuth() {
           uid: userRecord.user.uid,
           email: userRecord.user.email,
           name: name,
+        }).then((user) => {
+          console.log(user);
+          localStorage.setItem("geo-locate-user", JSON.stringify(user));
+          setUser(user);
         });
-        // See the UserRecord reference doc for the contents of userRecord.
+
         console.log("Successfully created new user:", userRecord);
+        setLoading(false);
       })
       .catch((error) => {
         console.log("Error creating new user:", error);
+        setLoading(false);
       });
   };
 
   const signInWithEmail = (email, password) => {
     setLoading(true);
-    return auth()
-      .signInWithEmailAndPassword(email, password)
-      .then((response) => {
-        console.log(response);
-        handleUser(response.user);
-      });
+    auth.signInWithEmailAndPassword(email, password).then((response) => {
+      firestore
+        .collection("users")
+        .doc(response.user.uid)
+        .get()
+        .then((user) => {
+          const data = user.data();
+          const signinUser = {
+            uid: response.user.uid,
+            email: data.email,
+            name: data.name,
+          };
+          console.log(signinUser);
+          localStorage.setItem("geo-locate-user", JSON.stringify(signinUser));
+          setUser(signinUser);
+        });
+    });
   };
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((userAuth) => {
-      setUser(userAuth);
+  const signOut = () => {
+    return auth.signOut().then(() => {
+      handleUser(false);
+      localStorage.removeItem("geo-locate-user");
     });
-    return () => unsubscribe();
-  }, []);
+  };
 
   return {
     user,
     loading,
     signInWithEmail,
     signUpWithEmail,
+    signOut,
   };
 }

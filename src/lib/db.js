@@ -6,10 +6,9 @@ export const createUser = async (user) => {
   const snapshot = await userRef.get();
   if (!snapshot.exists) {
     const { email, name } = user;
-    console.log(email, name);
     try {
       await userRef.set({
-        name,
+        displayName: name,
         email,
       });
     } catch (error) {

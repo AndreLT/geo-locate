@@ -12,10 +12,11 @@ const SignIn = () => {
 
   const onSubmit = (event, email, password, name) => {
     event.preventDefault();
-    signUpWithEmail(email, password, name).catch((error) => {
+    /*signUpWithEmail(email, password, name).catch((error) => {
       setError(error.message);
       console.log(error.message);
-    });
+    });*/
+    signInWithEmail(email, password);
   };
 
   const onChangeHandler = (event) => {
