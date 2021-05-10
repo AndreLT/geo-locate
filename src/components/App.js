@@ -9,8 +9,8 @@ import { useAuth } from "../providers/UserProvider";
 function App() {
   const auth = useAuth();
 
-  ReactGA.initialize("G-LJVXCHC56Y");
-  ReactGA.pageview();
+  ReactGA.initialize("UA-196683293-1");
+  ReactGA.pageview(window.location.pathname + window.location.search);
 
   return (
     <Flex justify="center" width="100%" height="100vh" align="center">
