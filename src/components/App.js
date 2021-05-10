@@ -1,12 +1,16 @@
 import { BrowserRouter as Router } from "react-router-dom";
 import SignIn from "./SignIn";
 import { Box, Text, Flex, Button } from "@chakra-ui/react";
+import ReactGA from "react-ga";
 
 import Dashboard from "./Dashboard";
 import { useAuth } from "../providers/UserProvider";
 
 function App() {
   const auth = useAuth();
+
+  ReactGA.initialize("G-LJVXCHC56Y");
+  ReactGA.pageview();
 
   return (
     <Flex justify="center" width="100%" height="100vh" align="center">
